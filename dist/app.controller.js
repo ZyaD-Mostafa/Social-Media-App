@@ -40,7 +40,7 @@ const bootstrap = () => {
     });
     app.use(error_response_1.globalErrorHandler);
     app.listen(port, () => {
-        console.log(`Server is Running on port ${port}`);
+        console.log(`Server is Running on port`, port);
     });
 };
 exports.bootstrap = bootstrap;

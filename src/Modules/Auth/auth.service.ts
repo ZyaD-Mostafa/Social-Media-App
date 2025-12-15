@@ -1,51 +1,95 @@
-import { Request, Response, NextFunction , } from "express";
-import { ApplicationException, BadRequestException, NotFoundRequestException } from "../../Utils/response/error.response";
-import { IloginDto, IsginupDto } from "./auth.dto";
-import * as valdation from "./auth.validation"
-import { promises } from "dns";
+import { Request, Response } from "express";
+import {
+  BadRequestException,
+  ConflictRequestException,
+  NotFoundRequestException,
+} from "../../Utils/response/error.response";
+import { IconfrimEmailOtpDto, IloginDto, IsginupDto } from "./auth.dto";
+import { UserModel } from "../../DB/models/user.model";
+import { UserRepository } from "../../DB/repository/user.repository";
+import { compareHash, generateHash } from "../../Utils/security/hash";
+import { generateOTP } from "../../Utils/security/generateOTP";
+import { emailEvent } from "../../Utils/events/email.event";
 
 class AuthService {
+  private _userModel = new UserRepository(UserModel);
+
   constructor() {}
 
-  signup = async (req: Request, res: Response, next: NextFunction): Promise<Response> => {
-   // throw new NotFoundRequestException("notfound");
+  signup = async (req: Request, res: Response): Promise<Response> => {
+    const { username, email, password }: IsginupDto = req.body;
 
-   const {username , email , password  } : IsginupDto =req.body
-   // console.log({username , email , password  });
+    const checkUser = await this._userModel.findOne({
+      filter: { email },
+      select: "email",
+    });
 
-    // try {
-    //   valdation.signupSchema.body.parse({ username , email , password})
-    // } catch (error) {
-    //   throw new BadRequestException ("invlaid data" , {cause : JSON.parse(error as string)})
-    // }
+    if (checkUser) throw new ConflictRequestException("User already exists");
 
-    // try {
-    //   await valdation.signupSchema.body.parseAsync({username , email , password})
-    // } catch (error) {
-    //   throw new BadRequestException ("invlaid data" , {cause : JSON.parse(error as string)})
-    // }
+    const otp = generateOTP();
+    const user = await this._userModel.createUser({
+      data: [
+        {
+          username,
+          email,
+          password: await generateHash(password),
+          confirmEmilOTP: await generateHash(otp),
+        },
+      ],
+      options: { validateBeforeSave: true },
+    });
 
-
-    // const result = valdation.signupSchema.body.safeParse({username , email , password ,confirmPassword})
-    // if ( !result.success){
-    //    throw new BadRequestException ("invlaid data" , {cause : JSON.parse(result.error as unknown as string)})
-    // }
-    console.log({username , email , password  });
-    
-    
+    await emailEvent.emit("confirmEmil", {
+      to: email,
+      username,
+      otp,
+    });
     return res.status(201).json({
       message: "User created successfully",
+      user,
     });
   };
 
-  login = (req: Request, res: Response) => {
+  login = async (req: Request, res: Response) => {
+    const { email, password }: IloginDto = req.body;
 
-    const {email , password} :IloginDto = req.body ; 
+    console.log({ email, password });
 
-    console.log({email , password});
-    
     res.status(200).json({
       message: "User logged in successfully",
+    });
+  };
+
+  confrimEmail = async (req: Request, res: Response): Promise<Response> => {
+    const { email, otp }: IconfrimEmailOtpDto = req.body;
+
+    const user = await this._userModel.findOne({
+      filter: {
+        email,
+        confirmEmilOTP: { $exists: true },
+        confirmedAT: { $exists: false },
+      },
+    });
+
+    if (!user) throw new NotFoundRequestException("User Not Found!");
+
+    const isValidOtp = await compareHash({
+      plainText: otp,
+      hash: user.confirmEmilOTP as string,
+    });
+
+    if (!isValidOtp) {
+      throw new BadRequestException("Invalid OTP");
+    }
+
+    //update user
+
+    await this._userModel.updateOne({
+      filter: { email },
+      update: { confirmedAT: new Date(), $unset: { confirmEmilOTP: 1 } },
+    });
+    return res.status(200).json({
+      message: "User Confrimed Successfully",
     });
   };
 }

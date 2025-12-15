@@ -10,4 +10,5 @@ const auth_validation_1 = require("./auth.validation");
 const router = (0, express_1.Router)();
 router.post("/signup", (0, validations_middleware_1.validation)(auth_validation_1.signupSchema), auth_service_1.default.signup);
 router.post("/login", auth_service_1.default.login);
+router.patch("/confirm-email", (0, validations_middleware_1.validation)(auth_validation_1.confirmEmailotpSchema), auth_service_1.default.confrimEmail);
 exports.default = router;

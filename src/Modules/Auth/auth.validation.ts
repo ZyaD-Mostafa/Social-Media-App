@@ -33,3 +33,10 @@ export const signupSchema = {
       }
     }),
 };
+
+export const confirmEmailotpSchema = {
+  body: z.strictObject({
+    email: generalFields.email,
+    otp: generalFields.otp,
+  }),
+};

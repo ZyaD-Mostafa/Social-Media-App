@@ -48,4 +48,6 @@ export const generalFields = {
   confirmPassword: z
     .string()
     .min(6, { error: "confirmPassword must be 6 char long" }),
+
+  otp: z.string().regex(/^\d{6}$/),
 };

@@ -41,6 +41,7 @@ const userSchema = new mongoose_1.Schema({
         enum: Object.values(RoleEnum),
         default: RoleEnum.USER,
     },
+    otpExpireAt: Date,
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 userSchema
     .virtual("username")

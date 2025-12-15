@@ -39,4 +39,5 @@ exports.generalFields = {
     confirmPassword: zod_1.z
         .string()
         .min(6, { error: "confirmPassword must be 6 char long" }),
+    otp: zod_1.z.string().regex(/^\d{6}$/),
 };

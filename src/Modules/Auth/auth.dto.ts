@@ -1,5 +1,6 @@
 import * as z from "zod"
-import { loginSchema, signupSchema } from "./auth.validation"
+import { confirmEmailotpSchema, loginSchema, signupSchema } from "./auth.validation"
 
 export type IsginupDto = z.infer<typeof signupSchema.body>
 export type IloginDto = z.infer<typeof loginSchema.body>
+export type IconfrimEmailOtpDto = z.infer<typeof confirmEmailotpSchema.body>

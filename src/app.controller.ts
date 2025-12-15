@@ -43,6 +43,6 @@ export const bootstrap = () => {
 
   app.use ( globalErrorHandler)
   app.listen(port, () => {
-    console.log(`Server is Running on port ${port}`);
+    console.log(`Server is Running on port` , port);
   });
 };

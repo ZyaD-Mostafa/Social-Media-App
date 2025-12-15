@@ -6,7 +6,7 @@ const connDB = async () => {
       serverSelectionTimeoutMS: 5000,
     });
 
-    console.log(`mongoDb connected Successfully`);
+    console.log(`mongoDB connected Successfully`);
   } catch (error) {
     console.log(`Error ${(error as Error).message}`);
   }

@@ -1,6 +1,4 @@
-import { model, models, Schema, Types } from "mongoose";
-import { string } from "zod";
-
+import { HydratedDocument, model, models, Schema, Types } from "mongoose";
 export enum GenderEnum {
   MALE = "MALE",
   FEMALE = "FEMAL",
@@ -26,6 +24,8 @@ export interface IUser {
 
   createdAt: Date;
   updatedAt?: Date;
+
+  otpExpireAt?: Date;
 }
 const userSchema = new Schema<IUser>(
   {
@@ -57,7 +57,10 @@ const userSchema = new Schema<IUser>(
       enum: Object.values(RoleEnum),
       default: RoleEnum.USER,
     },
+
+    otpExpireAt: Date,
   },
+
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
@@ -71,3 +74,5 @@ userSchema
     return `${this.firstname} ${this.lastname}`;
   });
 export const UserModel = models.User || model("User", userSchema);
+
+export type HUserDocumnet = HydratedDocument<IUser>;

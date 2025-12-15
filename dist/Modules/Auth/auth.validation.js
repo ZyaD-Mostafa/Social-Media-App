@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.signupSchema = exports.loginSchema = void 0;
+exports.confirmEmailotpSchema = exports.signupSchema = exports.loginSchema = void 0;
 const z = __importStar(require("zod"));
 const validations_middleware_1 = require("../../Middlewares/validations.middleware");
 exports.loginSchema = {
@@ -63,5 +63,11 @@ exports.signupSchema = {
                 path: ["username"],
             });
         }
+    }),
+};
+exports.confirmEmailotpSchema = {
+    body: z.strictObject({
+        email: validations_middleware_1.generalFields.email,
+        otp: validations_middleware_1.generalFields.otp,
     }),
 };
