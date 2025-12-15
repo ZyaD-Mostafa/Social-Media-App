@@ -25,6 +25,7 @@ class AuthService {
                     email,
                     password: await (0, hash_1.generateHash)(password),
                     confirmEmilOTP: await (0, hash_1.generateHash)(otp),
+                    otpExpireAt: new Date(Date.now() + 3 * 60 * 1000),
                 },
             ],
             options: { validateBeforeSave: true },
@@ -64,9 +65,15 @@ class AuthService {
         if (!isValidOtp) {
             throw new error_response_1.BadRequestException("Invalid OTP");
         }
+        if (user.otpExpireAt && new Date() > user.otpExpireAt) {
+            throw new error_response_1.BadRequestException("OTP Expired");
+        }
         await this._userModel.updateOne({
             filter: { email },
-            update: { confirmedAT: new Date(), $unset: { confirmEmilOTP: 1 } },
+            update: {
+                confirmedAT: new Date(),
+                $unset: { confirmEmilOTP: 1, otpExpireAt: 1 },
+            },
         });
         return res.status(200).json({
             message: "User Confrimed Successfully",

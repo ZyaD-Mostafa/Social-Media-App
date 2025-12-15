@@ -27,6 +27,7 @@ class AuthService {
     if (checkUser) throw new ConflictRequestException("User already exists");
 
     const otp = generateOTP();
+    // otpExpireAt = new Date(Date.now() + 60 * 60 * 1000); // minut
     const user = await this._userModel.createUser({
       data: [
         {
@@ -34,6 +35,7 @@ class AuthService {
           email,
           password: await generateHash(password),
           confirmEmilOTP: await generateHash(otp),
+          otpExpireAt: new Date(Date.now() + 3 * 60 * 1000),
         },
       ],
       options: { validateBeforeSave: true },
@@ -82,11 +84,17 @@ class AuthService {
       throw new BadRequestException("Invalid OTP");
     }
 
+    if (user.otpExpireAt && new Date() > user.otpExpireAt) {
+      throw new BadRequestException("OTP Expired");
+    }
     //update user
 
     await this._userModel.updateOne({
       filter: { email },
-      update: { confirmedAT: new Date(), $unset: { confirmEmilOTP: 1 } },
+      update: {
+        confirmedAT: new Date(),
+        $unset: { confirmEmilOTP: 1, otpExpireAt: 1 },
+      },
     });
     return res.status(200).json({
       message: "User Confrimed Successfully",
