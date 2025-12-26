@@ -42,7 +42,6 @@ const userSchema = new mongoose_1.Schema({
         default: RoleEnum.USER,
     },
     otpExpireAt: Date,
-    changeCredintaialstime: Date,
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 userSchema
     .virtual("username")

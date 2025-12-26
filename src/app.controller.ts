@@ -1,12 +1,12 @@
 import express from "express";
 import cors from "cors";
-import type { Express, NextFunction, Request, Response } from "express";
+import type { Express,  Request, Response } from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { config } from "dotenv";
 import path from "path";
 import authRouter from "./Modules/Auth/auth.controller";
-import { request } from "http";
+import UserRouter from "./Modules/User/user.controller";
 import { globalErrorHandler } from "./Utils/response/error.response";
 import connDB from "./DB/connections";
 config({ path: path.resolve("./config/.env.dev") });
@@ -32,6 +32,7 @@ export const bootstrap = () => {
   });
 
   app.use("/api/v1/auth", authRouter);
+  app.use("/api/v1/user", UserRouter);
 
   app.use("{/*dummy}", (req: Request, res: Response) => {
     res.status(404).json({

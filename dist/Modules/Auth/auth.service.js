@@ -6,6 +6,7 @@ const user_repository_1 = require("../../DB/repository/user.repository");
 const hash_1 = require("../../Utils/security/hash");
 const generateOTP_1 = require("../../Utils/security/generateOTP");
 const email_event_1 = require("../../Utils/events/email.event");
+const token_1 = require("../../Utils/security/token");
 class AuthService {
     _userModel = new user_repository_1.UserRepository(user_model_1.UserModel);
     constructor() { }
@@ -42,9 +43,17 @@ class AuthService {
     };
     login = async (req, res) => {
         const { email, password } = req.body;
-        console.log({ email, password });
+        const user = await this._userModel.findOne({ filter: { email } });
+        if (!user)
+            throw new error_response_1.NotFoundRequestException("User Not Found!");
+        if (!user.confirmedAT)
+            throw new error_response_1.BadRequestException("Confirm Your Account");
+        if (!(0, hash_1.compareHash)({ plainText: password, hash: user.password }))
+            throw new error_response_1.BadRequestException("Invalid Password");
+        const credentials = await (0, token_1.createCredentials)(user);
         res.status(200).json({
             message: "User logged in successfully",
+            credentials: credentials,
         });
     };
     confrimEmail = async (req, res) => {

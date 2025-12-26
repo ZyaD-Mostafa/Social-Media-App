@@ -7,9 +7,12 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "commonjs", // better in preformance 
+    "module": "commonjs", // better in preformance
     "target": "es2024",
     "types": ["node"],
+    "paths": {
+      "*": ["./src/Utils/types/*"]
+    },
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -41,6 +44,6 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "skipLibCheck": true,
+    "skipLibCheck": true
   }
 }

@@ -4,7 +4,6 @@ export interface IError extends Error {
   statusCode: number;
 }
 
-
 export class ApplicationException  extends Error {
     constructor ( message :string , public statusCode : number = 400 ,  options?:ErrorOptions ){
         super(message , options)
@@ -28,6 +27,16 @@ export class ConflictRequestException extends ApplicationException {
         super(message, 409, options);
     }
 }
+export class UnAuthorizedRequestException extends ApplicationException {
+    constructor(message: string, options?: ErrorOptions) {
+        super(message, 401, options);
+    }
+}
+export class ForbiddenRequestException extends ApplicationException {
+    constructor(message: string, options?: ErrorOptions) {
+        super(message, 403, options);
+    }
+}
 
 export const globalErrorHandler = (
   err: IError,
@@ -41,3 +50,4 @@ export const globalErrorHandler = (
     cause: err.cause,
   });
 };
+

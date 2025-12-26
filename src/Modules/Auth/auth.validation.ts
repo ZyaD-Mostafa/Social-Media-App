@@ -40,3 +40,5 @@ export const confirmEmailotpSchema = {
     otp: generalFields.otp,
   }),
 };
+
+

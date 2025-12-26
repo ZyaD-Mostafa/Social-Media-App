@@ -19,5 +19,12 @@ class DatabaseRepository {
     async updateOne({ filter, update, options, }) {
         return await this.model.updateOne(filter, { ...update, $inc: { __v: 1 } }, options);
     }
+    async findById({ id, select, options, }) {
+        const doc = this.model.findById(id).select(select || "");
+        if (options?.populate) {
+            doc.populate(options.populate);
+        }
+        return await doc.exec();
+    }
 }
 exports.DatabaseRepository = DatabaseRepository;

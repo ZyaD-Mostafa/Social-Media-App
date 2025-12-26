@@ -10,6 +10,7 @@ import { UserRepository } from "../../DB/repository/user.repository";
 import { compareHash, generateHash } from "../../Utils/security/hash";
 import { generateOTP } from "../../Utils/security/generateOTP";
 import { emailEvent } from "../../Utils/events/email.event";
+import { createCredentials } from "../../Utils/security/token";
 
 class AuthService {
   private _userModel = new UserRepository(UserModel);
@@ -55,10 +56,18 @@ class AuthService {
   login = async (req: Request, res: Response) => {
     const { email, password }: IloginDto = req.body;
 
-    console.log({ email, password });
+    const user = await this._userModel.findOne({ filter: { email } });
+    if (!user) throw new NotFoundRequestException("User Not Found!");
+    if (!user.confirmedAT)
+      throw new BadRequestException("Confirm Your Account");
+    if (!compareHash({ plainText: password, hash: user.password }))
+      throw new BadRequestException("Invalid Password");
+
+    const credentials = await createCredentials(user);
 
     res.status(200).json({
       message: "User logged in successfully",
+      credentials: credentials,
     });
   };
 

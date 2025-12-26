@@ -11,6 +11,7 @@ const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
 const dotenv_1 = require("dotenv");
 const path_1 = __importDefault(require("path"));
 const auth_controller_1 = __importDefault(require("./Modules/Auth/auth.controller"));
+const user_controller_1 = __importDefault(require("./Modules/User/user.controller"));
 const error_response_1 = require("./Utils/response/error.response");
 const connections_1 = __importDefault(require("./DB/connections"));
 (0, dotenv_1.config)({ path: path_1.default.resolve("./config/.env.dev") });
@@ -33,6 +34,7 @@ const bootstrap = () => {
         });
     });
     app.use("/api/v1/auth", auth_controller_1.default);
+    app.use("/api/v1/user", user_controller_1.default);
     app.use("{/*dummy}", (req, res) => {
         res.status(404).json({
             message: "Not Found Handller",

@@ -26,6 +26,8 @@ export interface IUser {
   updatedAt?: Date;
 
   otpExpireAt?: Date;
+
+  changeCredintaialstime?: Date;
 }
 const userSchema = new Schema<IUser>(
   {
@@ -59,6 +61,8 @@ const userSchema = new Schema<IUser>(
     },
 
     otpExpireAt: Date,
+
+    changeCredintaialstime  :Date,
   },
 
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
