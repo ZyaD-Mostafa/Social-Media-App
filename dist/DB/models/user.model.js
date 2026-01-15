@@ -41,7 +41,9 @@ const userSchema = new mongoose_1.Schema({
         enum: Object.values(RoleEnum),
         default: RoleEnum.USER,
     },
+    coverImage: [String],
     otpExpireAt: Date,
+    profileImage: String,
     changeCredintaialstime: Date,
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 userSchema

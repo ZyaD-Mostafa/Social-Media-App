@@ -27,6 +27,9 @@ export interface IUser {
 
   otpExpireAt?: Date;
 
+  profileImage?: String;
+  coverImage?: String[];
+
   changeCredintaialstime?: Date;
 }
 const userSchema = new Schema<IUser>(
@@ -60,9 +63,12 @@ const userSchema = new Schema<IUser>(
       default: RoleEnum.USER,
     },
 
-    otpExpireAt: Date,
+    coverImage: [String],
 
-    changeCredintaialstime  :Date,
+    otpExpireAt: Date,
+    profileImage: String,
+
+    changeCredintaialstime: Date,
   },
 
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
