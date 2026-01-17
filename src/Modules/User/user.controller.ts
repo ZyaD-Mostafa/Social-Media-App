@@ -10,6 +10,7 @@ import {
   fileValidtion,
   StorageEnum,
 } from "../../Utils/multer/cloud.multer";
+import { verifyMagicFileUpload } from "../../Middlewares/verfiyFileUpload.middleware";
 
 const router: Router = Router();
 
@@ -29,21 +30,28 @@ router.patch(
   "/profile-image",
   authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
   cloudFileUpload({
-    validation: [...fileValidtion.images],
+    validation: [...fileValidtion.images, ...fileValidtion.pdf],
     storageApproch: StorageEnum.MEMORY,
     maxSizeMb: 3,
   }).single("attachments"),
+  verifyMagicFileUpload({
+    allowTypes: [...fileValidtion.images, ...fileValidtion.pdf],
+  }),
 
   userService.profileImage
 );
+
 router.patch(
   "/cover-image",
   authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
   cloudFileUpload({
-    validation: [...fileValidtion.images],
+    validation: [...fileValidtion.images, ...fileValidtion.pdf],
     storageApproch: StorageEnum.MEMORY,
     maxSizeMb: 3,
   }).array("attachments", 5),
+  verifyMagicFileUpload({
+    allowTypes: [...fileValidtion.images, ...fileValidtion.pdf],
+  }),
 
   userService.coverImages
 );

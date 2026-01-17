@@ -11,17 +11,22 @@ const user_model_1 = require("../../DB/models/user.model");
 const user_validation_1 = require("./user.validation");
 const validations_middleware_1 = require("../../Middlewares/validations.middleware");
 const cloud_multer_1 = require("../../Utils/multer/cloud.multer");
+const verfiyFileUpload_middleware_1 = require("../../Middlewares/verfiyFileUpload.middleware");
 const router = (0, express_1.Router)();
 router.get("/profile", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), user_service_1.default.getProfile);
 router.post("/logout", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, validations_middleware_1.validation)(user_validation_1.logoutSchema), user_service_1.default.logout);
 router.patch("/profile-image", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, cloud_multer_1.cloudFileUpload)({
-    validation: [...cloud_multer_1.fileValidtion.images],
+    validation: [...cloud_multer_1.fileValidtion.images, ...cloud_multer_1.fileValidtion.pdf],
     storageApproch: cloud_multer_1.StorageEnum.MEMORY,
     maxSizeMb: 3,
-}).single("attachments"), user_service_1.default.profileImage);
+}).single("attachments"), (0, verfiyFileUpload_middleware_1.verifyMagicFileUpload)({
+    allowTypes: [...cloud_multer_1.fileValidtion.images, ...cloud_multer_1.fileValidtion.pdf],
+}), user_service_1.default.profileImage);
 router.patch("/cover-image", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, cloud_multer_1.cloudFileUpload)({
-    validation: [...cloud_multer_1.fileValidtion.images],
+    validation: [...cloud_multer_1.fileValidtion.images, ...cloud_multer_1.fileValidtion.pdf],
     storageApproch: cloud_multer_1.StorageEnum.MEMORY,
     maxSizeMb: 3,
-}).array("attachments", 5), user_service_1.default.coverImages);
+}).array("attachments", 5), (0, verfiyFileUpload_middleware_1.verifyMagicFileUpload)({
+    allowTypes: [...cloud_multer_1.fileValidtion.images, ...cloud_multer_1.fileValidtion.pdf],
+}), user_service_1.default.coverImages);
 exports.default = router;
