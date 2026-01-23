@@ -22,6 +22,7 @@ router.patch("/profile-image", (0, authentaication_middleware_1.authentication)(
 }).single("attachments"), (0, verfiyFileUpload_middleware_1.verifyMagicFileUpload)({
     allowTypes: [...cloud_multer_1.fileValidtion.images, ...cloud_multer_1.fileValidtion.pdf],
 }), user_service_1.default.profileImage);
+router.patch("/profile-image-presigned", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), user_service_1.default.profileImagePresigned);
 router.patch("/cover-image", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, cloud_multer_1.cloudFileUpload)({
     validation: [...cloud_multer_1.fileValidtion.images, ...cloud_multer_1.fileValidtion.pdf],
     storageApproch: cloud_multer_1.StorageEnum.MEMORY,
@@ -29,4 +30,6 @@ router.patch("/cover-image", (0, authentaication_middleware_1.authentication)(to
 }).array("attachments", 5), (0, verfiyFileUpload_middleware_1.verifyMagicFileUpload)({
     allowTypes: [...cloud_multer_1.fileValidtion.images, ...cloud_multer_1.fileValidtion.pdf],
 }), user_service_1.default.coverImages);
+router.delete("/delete-file", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), user_service_1.default.deleteFile);
+router.delete("/delete-files", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), user_service_1.default.deleteMultipleFiles);
 exports.default = router;

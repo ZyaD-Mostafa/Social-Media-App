@@ -40,7 +40,11 @@ router.patch(
 
   userService.profileImage
 );
-
+router.patch(
+  "/profile-image-presigned",
+  authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
+  userService.profileImagePresigned
+);
 router.patch(
   "/cover-image",
   authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
@@ -54,6 +58,20 @@ router.patch(
   }),
 
   userService.coverImages
+);
+
+
+router.delete(
+  "/delete-file",
+  authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
+  userService.deleteFile
+);
+
+
+router.delete(
+  "/delete-files",
+  authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
+  userService.deleteMultipleFiles
 );
 
 export default router;

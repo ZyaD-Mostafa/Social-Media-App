@@ -1,13 +1,19 @@
 import {
+  DeleteObjectCommand,
+  DeleteObjectCommandOutput,
+  DeleteObjectsCommand,
+  GetObjectCommand,
+  GetObjectCommandOutput,
   ObjectCannedACL,
   PutObjectCommand,
+  PutObjectCommandOutput,
   S3Client,
 } from "@aws-sdk/client-s3";
 import { StorageEnum } from "./cloud.multer";
 import { v4 as uuid } from "uuid";
 import { BadRequestException } from "../response/error.response";
 import { Upload } from "@aws-sdk/lib-storage";
-import { url } from "inspector";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const s3Config = () => {
   return new S3Client({
@@ -117,4 +123,102 @@ export const uploadFiles = async ({
   }
 
   return urls;
+};
+
+export const createPresignedURL = async ({
+  Bucket = process.env.S3_Bucket_name as string,
+  path = "general",
+  ContentType,
+  originalname,
+  expiresIn = 120,
+}: {
+  Bucket?: string;
+  path?: string;
+  ContentType: string;
+  originalname: string;
+  expiresIn?: number;
+}) => {
+  const command = new PutObjectCommand({
+    Bucket,
+    Key: `${
+      process.env.APPLICATION_NAME
+    }/${path}/${uuid()}-presignedURL-${originalname}`,
+    ContentType,
+  });
+  const url = await getSignedUrl(s3Config(), command, { expiresIn });
+  if (!url || !command?.input.Key)
+    throw new BadRequestException("fail to generate Pre URl");
+  return { url, Key: command.input.Key };
+};
+
+export const getFile = async ({
+  Bucket = process.env.S3_Bucket_name as string,
+  Key,
+}: {
+  Bucket?: string;
+  Key: string; //path
+}): Promise<GetObjectCommandOutput> => {
+  const command = new GetObjectCommand({
+    Bucket,
+    Key,
+  });
+
+  return await s3Config().send(command);
+};
+
+export const createGetPresignedURL = async ({
+  Bucket = process.env.S3_Bucket_name as string,
+  Key,
+  expiresIn = 120,
+}: {
+  Bucket?: string;
+  Key: string;
+  expiresIn?: number;
+}): Promise<string> => {
+  const command = new GetObjectCommand({
+    Bucket,
+    Key,
+  });
+  const url = await getSignedUrl(s3Config(), command, { expiresIn });
+  if (!url) throw new BadRequestException("fail fetch url presgined");
+  return url;
+};
+
+export const delteFile = async ({
+  Bucket = process.env.S3_Bucket_name as string,
+  Key,
+}: {
+  Bucket?: string;
+  Key: string;
+}): Promise<DeleteObjectCommandOutput> => {
+  const command = new DeleteObjectCommand({
+    Bucket,
+    Key,
+  });
+  return await s3Config().send(command);
+};
+
+export const delteFiles = async ({
+  Bucket = process.env.S3_Bucket_name as string,
+  urls,
+  Quiet = false,
+}: {
+  Bucket?: string;
+  urls: string[];
+  Quiet?: boolean;
+}): Promise<DeleteObjectCommandOutput> => {
+  const Objects = urls.map((url) => {
+    return {
+      Key: url,
+    };
+  });
+
+  const command = new DeleteObjectsCommand({
+    Bucket,
+    Delete: {
+      Objects,
+      Quiet,
+    },
+  });
+  return await s3Config().send(command);
 };
