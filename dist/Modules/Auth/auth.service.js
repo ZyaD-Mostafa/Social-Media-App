@@ -5,7 +5,6 @@ const user_model_1 = require("../../DB/models/user.model");
 const user_repository_1 = require("../../DB/repository/user.repository");
 const hash_1 = require("../../Utils/security/hash");
 const generateOTP_1 = require("../../Utils/security/generateOTP");
-const email_event_1 = require("../../Utils/events/email.event");
 const token_1 = require("../../Utils/security/token");
 class AuthService {
     _userModel = new user_repository_1.UserRepository(user_model_1.UserModel);
@@ -24,17 +23,12 @@ class AuthService {
                 {
                     username,
                     email,
-                    password: await (0, hash_1.generateHash)(password),
-                    confirmEmilOTP: await (0, hash_1.generateHash)(otp),
+                    password,
+                    confirmEmilOTP: `${otp}`,
                     otpExpireAt: new Date(Date.now() + 3 * 60 * 1000),
                 },
             ],
             options: { validateBeforeSave: true },
-        });
-        await email_event_1.emailEvent.emit("confirmEmil", {
-            to: email,
-            username,
-            otp,
         });
         return res.status(201).json({
             message: "User created successfully",

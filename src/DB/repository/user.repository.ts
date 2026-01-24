@@ -4,20 +4,19 @@ import { DatabaseRepository } from "./database.repository";
 import { BadRequestException } from "../../Utils/response/error.response";
 
 export class UserRepository extends DatabaseRepository<IUser> {
-    constructor(protected override readonly  model:Model<IUser>){
-        super(model)
-    }
-    async  createUser({
-        data = [],
-        options = {},
-      }: {
-        data: Partial<IUser>[];
-        options?: CreateOptions;
-      }) {
-        const [user] = (await this.create({ data, options })) || [];
-        if (!user) throw new BadRequestException("fail to signup");
-    
-        return user;
-      }
-    
+  constructor(protected override readonly model: Model<IUser>) {
+    super(model);
+  }
+  async createUser({
+    data = [],
+    options = {},
+  }: {
+    data: Partial<IUser>[];
+    options?: CreateOptions;
+  }) {
+    const [user] = (await this.create({ data, options })) || [];
+    if (!user) throw new BadRequestException("fail to signup");
+
+    return user;
+  }
 }

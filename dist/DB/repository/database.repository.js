@@ -9,8 +9,18 @@ class DatabaseRepository {
     async create({ data, options, }) {
         return await this.model.create(data, options);
     }
+    async insertMany({ data, }) {
+        return (await this.model.insertMany(data));
+    }
     async findOne({ filter, select, options, }) {
         const doc = this.model.findOne(filter).select(select || "");
+        if (options?.populate) {
+            doc.populate(options.populate);
+        }
+        return await doc.exec();
+    }
+    async findOneAndUpdate({ filter, update, options, }) {
+        const doc = this.model.findOneAndUpdate(filter, update);
         if (options?.populate) {
             doc.populate(options.populate);
         }
@@ -25,6 +35,15 @@ class DatabaseRepository {
             doc.populate(options.populate);
         }
         return await doc.exec();
+    }
+    async deleteOne({ filter, }) {
+        return await this.model.deleteOne(filter);
+    }
+    async deleteMany({ filter, }) {
+        return await this.model.deleteMany(filter);
+    }
+    async findOneAndDelete({ filter, }) {
+        return await this.model.findOneAndDelete(filter);
     }
 }
 exports.DatabaseRepository = DatabaseRepository;

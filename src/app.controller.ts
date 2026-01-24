@@ -26,7 +26,7 @@ const limiter = rateLimit({
   },
 });
 const createS3WriteStreampipe = promisify(pipeline);
-export const bootstrap = () => {
+export const bootstrap = async () => {
   const app: Express = express();
   const port: number = Number(process.env.PORT) || 5000;
 

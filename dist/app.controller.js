@@ -27,7 +27,7 @@ const limiter = (0, express_rate_limit_1.default)({
     },
 });
 const createS3WriteStreampipe = (0, util_1.promisify)(stream_1.pipeline);
-const bootstrap = () => {
+const bootstrap = async () => {
     const app = (0, express_1.default)();
     const port = Number(process.env.PORT) || 5000;
     (0, connections_1.default)();

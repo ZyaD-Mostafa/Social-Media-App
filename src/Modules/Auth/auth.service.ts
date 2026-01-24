@@ -7,7 +7,7 @@ import {
 import { IconfrimEmailOtpDto, IloginDto, IsginupDto } from "./auth.dto";
 import { UserModel } from "../../DB/models/user.model";
 import { UserRepository } from "../../DB/repository/user.repository";
-import { compareHash, generateHash } from "../../Utils/security/hash";
+import { compareHash } from "../../Utils/security/hash";
 import { generateOTP } from "../../Utils/security/generateOTP";
 import { emailEvent } from "../../Utils/events/email.event";
 import { createCredentials } from "../../Utils/security/token";
@@ -34,18 +34,12 @@ class AuthService {
         {
           username,
           email,
-          password: await generateHash(password),
-          confirmEmilOTP: await generateHash(otp),
+          password,
+          confirmEmilOTP: `${otp}`,
           otpExpireAt: new Date(Date.now() + 3 * 60 * 1000),
         },
       ],
       options: { validateBeforeSave: true },
-    });
-
-    await emailEvent.emit("confirmEmil", {
-      to: email,
-      username,
-      otp,
     });
     return res.status(201).json({
       message: "User created successfully",

@@ -3,7 +3,7 @@ import { IToken } from "../models/token.model";
 import { Model } from "mongoose";
 
 export class TokenRepository extends DatabaseRepository<IToken> {
-    constructor(protected override readonly  model:Model<IToken>){
-        super(model)
-    }
+  constructor(protected override readonly model: Model<IToken>) {
+    super(model);
+  }
 }
