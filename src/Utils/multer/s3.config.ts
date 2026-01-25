@@ -198,7 +198,7 @@ export const delteFile = async ({
   return await s3Config().send(command);
 };
 
-export const delteFiles = async ({
+export const deleteFiles = async ({
   Bucket = process.env.S3_Bucket_name as string,
   urls,
   Quiet = false,

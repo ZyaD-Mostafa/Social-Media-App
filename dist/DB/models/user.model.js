@@ -4,8 +4,6 @@ exports.UserModel = exports.RoleEnum = exports.GenderEnum = void 0;
 const mongoose_1 = require("mongoose");
 const error_response_1 = require("../../Utils/response/error.response");
 const hash_1 = require("../../Utils/security/hash");
-const token_model_1 = require("./token.model");
-const token_repository_1 = require("../repository/token.repository");
 const email_event_1 = require("../../Utils/events/email.event");
 var GenderEnum;
 (function (GenderEnum) {
@@ -95,31 +93,6 @@ userSchema.post("save", function (doc) {
             username: `${this.firstname} ${this.lastname}`,
             otp: that.confirmEmilPlainOTP,
         });
-    }
-});
-userSchema.pre(["updateOne", "findOneAndUpdate"], async function (next) {
-    const update = this.getUpdate();
-    if (update.freezedAt) {
-        this.setUpdate({ ...update, changeCredintaialstime: new Date() });
-    }
-});
-userSchema.post(["updateOne", "findOneAndUpdate"], async function (next) {
-    const query = this.getQuery();
-    const update = this.getUpdate();
-    console.log({ query, update });
-    if (update["$set"].changeCredintaialstime) {
-        const tokenmodel = new token_repository_1.TokenRepository(token_model_1.TokenModel);
-        await tokenmodel.deleteMany({ filter: { userId: query._id } });
-    }
-});
-userSchema.pre(["deleteOne", "deleteMany", "findOneAndDelete"], async function (next) {
-    const query = this.getQuery();
-    const tokenmodel = new token_repository_1.TokenRepository(token_model_1.TokenModel);
-    await tokenmodel.deleteMany({ filter: { userId: query._id } });
-});
-userSchema.pre("insertMany", async function (docs) {
-    for (const doc of docs) {
-        doc.password = await (0, hash_1.generateHash)(doc.password);
     }
 });
 exports.UserModel = mongoose_1.models.User || (0, mongoose_1.model)("User", userSchema);

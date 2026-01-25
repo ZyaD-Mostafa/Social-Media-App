@@ -24,7 +24,7 @@ const tokenSchema = new Schema<IToken>(
     },
   },
 
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const TokenModel = models.Token || model("Token", tokenSchema);

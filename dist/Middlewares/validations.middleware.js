@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.generalFields = exports.validation = void 0;
 const error_response_1 = require("../Utils/response/error.response");
 const zod_1 = require("zod");
+const mongoose_1 = require("mongoose");
 const validation = (schema) => {
     return (req, res, next) => {
         const validationErrors = [];
@@ -40,4 +41,21 @@ exports.generalFields = {
         .string()
         .min(6, { error: "confirmPassword must be 6 char long" }),
     otp: zod_1.z.string().regex(/^\d{6}$/),
+    file: function (minetype) {
+        return zod_1.z
+            .strictObject({
+            fieldname: zod_1.z.string(),
+            originalname: zod_1.z.string(),
+            mimetype: zod_1.z.enum(minetype),
+            size: zod_1.z.number(),
+            buffer: zod_1.z.any().optional(),
+            path: zod_1.z.string().optional(),
+        })
+            .refine((data) => {
+            return data.path || data.buffer;
+        }, { error: "please provide a file " });
+    },
+    id: zod_1.z.string().refine((data) => {
+        return mongoose_1.Types.ObjectId.isValid(data);
+    }, { error: "Invalid ID " }),
 };

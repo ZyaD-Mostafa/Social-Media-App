@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { BadRequestException } from "../Utils/response/error.response";
 import { ZodError, ZodType, z } from "zod";
+import { buffer } from "stream/consumers";
+import { Types } from "mongoose";
 
 type keyReqType = keyof Request;
 type SchmeaType = Partial<Record<keyReqType, ZodType>>;
@@ -36,16 +38,6 @@ export const validation = (schema: SchmeaType) => {
   };
 };
 
-
-
-
-
-
-
-
-
-
-
 export const generalFields = {
   username: z
     .string({ error: "username is Required" })
@@ -60,4 +52,28 @@ export const generalFields = {
     .min(6, { error: "confirmPassword must be 6 char long" }),
 
   otp: z.string().regex(/^\d{6}$/),
+  file: function (minetype: string[]) {
+    return z
+      .strictObject({
+        fieldname: z.string(),
+        originalname: z.string(),
+        mimetype: z.enum(minetype),
+        size: z.number(),
+        buffer: z.any().optional(),
+        path: z.string().optional(),
+      })
+      .refine(
+        (data) => {
+          return data.path || data.buffer;
+        },
+        { error: "please provide a file " },
+      );
+  },
+
+  id: z.string().refine(
+    (data) => {
+      return Types.ObjectId.isValid(data);
+    },
+    { error: "Invalid ID " },
+  ),
 };
