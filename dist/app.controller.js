@@ -18,6 +18,7 @@ const connections_1 = __importDefault(require("./DB/connections"));
 const s3_config_1 = require("./Utils/multer/s3.config");
 const util_1 = require("util");
 const stream_1 = require("stream");
+const socket_io_1 = require("socket.io");
 (0, dotenv_1.config)({ path: path_1.default.resolve("./config/.env.dev") });
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
@@ -85,8 +86,30 @@ const bootstrap = async () => {
         });
     });
     app.use(error_response_1.globalErrorHandler);
-    app.listen(port, () => {
+    const httpServer = app.listen(port, () => {
         console.log(`Server is Running on port`, port);
+    });
+    const io = new socket_io_1.Server(httpServer, {
+        cors: {
+            origin: "*",
+        },
+    });
+    let connectedSockets = [];
+    io.on("connection", (socket) => {
+        console.log(socket.id, "Classic Connection");
+        connectedSockets.push(socket.id);
+        io.except(connectedSockets[connectedSockets.length - 3]).emit("product", { id: 1, this: "product1", price: 14451 }, (res) => {
+            console.log(res);
+        });
+        socket.on("disconnect", () => {
+            console.log("Client disconnected : ", socket.id);
+        });
+    });
+    io.of("/admin").on("connection", (socket) => {
+        console.log(socket.id, "Admin Connection");
+        socket.on("disconnect", () => {
+            console.log("Client disconnected : ", socket.id);
+        });
     });
 };
 exports.bootstrap = bootstrap;

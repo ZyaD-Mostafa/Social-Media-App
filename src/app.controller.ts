@@ -8,7 +8,6 @@ import path from "path";
 import authRouter from "./Modules/Auth/auth.controller";
 import UserRouter from "./Modules/User/user.controller";
 import postRouter from "./Modules/Post/post.controller";
-
 import {
   BadRequestException,
   globalErrorHandler,
@@ -17,6 +16,7 @@ import connDB from "./DB/connections";
 import { createGetPresignedURL, getFile } from "./Utils/multer/s3.config";
 import { promisify } from "util";
 import { pipeline } from "stream";
+import { Server } from "socket.io";
 config({ path: path.resolve("./config/.env.dev") });
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, //15M
@@ -111,7 +111,73 @@ export const bootstrap = async () => {
   });
 
   app.use(globalErrorHandler);
-  app.listen(port, () => {
+
+  const httpServer = app.listen(port, () => {
     console.log(`Server is Running on port`, port);
+  });
+
+  // socket io server creation and listen to httpServer
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+    },
+  });
+
+  // http://localhost:3000/
+  let connectedSockets: string[] = [];
+  io.on("connection", (socket) => {
+    console.log(socket.id, "Classic Connection");
+    connectedSockets.push(socket.id);
+    //socket.emit() ----> send data to same cleint connect with me
+
+    //io.emit() ----> send data to all clients
+    //   io.emit("product", {id:1 , this: "product1" , price : 14451} , (res : Response)=>{
+    //   console.log(res);
+    //  });
+
+    //socket.broadcast().emit() ----> send data to all clients except sender
+    //  socket.broadcast.emit("product", {id:1 , this: "product1" , price : 14451} , (res : Response)=>{
+    //   console.log(res);
+    //  });
+    //io.to(socket.id).emit() ----> send data to specific client
+
+    // io.to(connectedSockets[connectedSockets.length - 3] as string).emit(
+    //   "product",
+    //   { id: 1, this: "product1", price: 14451 },
+    //   (res: Response) => {
+    //     console.log(res);
+    //   },
+    // );
+    //io.except(socket.id).emit() ----> send data to all clients except sender
+        io.except(connectedSockets[connectedSockets.length - 3] as string).emit(
+      "product",
+      { id: 1, this: "product1", price: 14451 },
+      (res: Response) => {
+        console.log(res);
+      },
+    );
+
+    //  socket.emit("product", {id:1 , this: "product1" , price : 14451} , (res : Response)=>{
+    //   console.log(res);
+
+    //  });
+
+    //  socket.on("SayHi" , (data , callback)=>{
+    //   console.log(data);
+    //   callback("back end rewcived the data ");
+    //  })
+
+    socket.on("disconnect", () => {
+      console.log("Client disconnected : ", socket.id);
+    });
+  });
+
+  // http://localhost:3000/admin
+  io.of("/admin").on("connection", (socket) => {
+    console.log(socket.id, "Admin Connection");
+
+    socket.on("disconnect", () => {
+      console.log("Client disconnected : ", socket.id);
+    });
   });
 };
