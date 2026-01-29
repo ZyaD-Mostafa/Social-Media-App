@@ -16,7 +16,8 @@ import connDB from "./DB/connections";
 import { createGetPresignedURL, getFile } from "./Utils/multer/s3.config";
 import { promisify } from "util";
 import { pipeline } from "stream";
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
+import { decodedToken, TokenTypeEnum } from "./Utils/security/token";
 config({ path: path.resolve("./config/.env.dev") });
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, //15M
@@ -123,61 +124,33 @@ export const bootstrap = async () => {
     },
   });
 
+  const connectedSockets = new Map<string, string>(); // key---->value
+
+  io.use(async (socket: Socket, next) => {
+    try {
+      const { user, decoded } = await decodedToken({
+        tokenType: TokenTypeEnum.ACCESS,
+        authoriztion: socket.handshake.auth.authorization,
+      });
+      connectedSockets.set(user._id.toString(), socket.id);
+
+      next();
+    } catch (error: any) {
+      next(error);
+    }
+  });
+
   // http://localhost:3000/
-  let connectedSockets: string[] = [];
   io.on("connection", (socket) => {
-    console.log(socket.id, "Classic Connection");
-    connectedSockets.push(socket.id);
-    //socket.emit() ----> send data to same cleint connect with me
-
-    //io.emit() ----> send data to all clients
-    //   io.emit("product", {id:1 , this: "product1" , price : 14451} , (res : Response)=>{
-    //   console.log(res);
-    //  });
-
-    //socket.broadcast().emit() ----> send data to all clients except sender
-    //  socket.broadcast.emit("product", {id:1 , this: "product1" , price : 14451} , (res : Response)=>{
-    //   console.log(res);
-    //  });
-    //io.to(socket.id).emit() ----> send data to specific client
-
-    // io.to(connectedSockets[connectedSockets.length - 3] as string).emit(
-    //   "product",
-    //   { id: 1, this: "product1", price: 14451 },
-    //   (res: Response) => {
-    //     console.log(res);
-    //   },
-    // );
-    //io.except(socket.id).emit() ----> send data to all clients except sender
-        io.except(connectedSockets[connectedSockets.length - 3] as string).emit(
-      "product",
-      { id: 1, this: "product1", price: 14451 },
-      (res: Response) => {
-        console.log(res);
-      },
-    );
-
-    //  socket.emit("product", {id:1 , this: "product1" , price : 14451} , (res : Response)=>{
-    //   console.log(res);
-
-    //  });
-
-    //  socket.on("SayHi" , (data , callback)=>{
-    //   console.log(data);
-    //   callback("back end rewcived the data ");
-    //  })
-
+    console.log(socket.id);
     socket.on("disconnect", () => {
       console.log("Client disconnected : ", socket.id);
+      connectedSockets.delete(socket.id);
     });
-  });
+  })
 
-  // http://localhost:3000/admin
-  io.of("/admin").on("connection", (socket) => {
-    console.log(socket.id, "Admin Connection");
+  
 
-    socket.on("disconnect", () => {
-      console.log("Client disconnected : ", socket.id);
-    });
-  });
+
+  
 };

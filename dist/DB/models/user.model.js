@@ -55,6 +55,12 @@ const userSchema = new mongoose_1.Schema({
         minLength: 3,
         maxLength: 61,
     },
+    friends: [
+        {
+            type: mongoose_1.Types.ObjectId,
+            ref: "User",
+        },
+    ],
 }, {
     timestamps: true,
     toJSON: { virtuals: true },

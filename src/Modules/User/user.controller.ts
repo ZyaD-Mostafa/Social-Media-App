@@ -3,7 +3,11 @@ import userService from "./user.service";
 import { authentication } from "../../Middlewares/authentaication.middleware";
 import { TokenTypeEnum } from "../../Utils/security/token";
 import { RoleEnum } from "../../DB/models/user.model";
-import { logoutSchema } from "./user.validation";
+import {
+  acceptFriendRequsetSchema,
+  logoutSchema,
+  sendFriendRequsetSchema,
+} from "./user.validation";
 import { validation } from "../../Middlewares/validations.middleware";
 import {
   cloudFileUpload,
@@ -17,13 +21,13 @@ const router: Router = Router();
 router.get(
   "/profile",
   authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
-  userService.getProfile
+  userService.getProfile,
 );
 router.post(
   "/logout",
   authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
   validation(logoutSchema),
-  userService.logout
+  userService.logout,
 );
 
 router.patch(
@@ -38,12 +42,12 @@ router.patch(
     allowTypes: [...fileValidtion.images, ...fileValidtion.pdf],
   }),
 
-  userService.profileImage
+  userService.profileImage,
 );
 router.patch(
   "/profile-image-presigned",
   authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
-  userService.profileImagePresigned
+  userService.profileImagePresigned,
 );
 router.patch(
   "/cover-image",
@@ -57,21 +61,33 @@ router.patch(
     allowTypes: [...fileValidtion.images, ...fileValidtion.pdf],
   }),
 
-  userService.coverImages
+  userService.coverImages,
 );
-
 
 router.delete(
   "/delete-file",
   authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
-  userService.deleteFile
+  userService.deleteFile,
 );
-
 
 router.delete(
   "/delete-files",
   authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
-  userService.deleteMultipleFiles
+  userService.deleteMultipleFiles,
+);
+
+router.post(
+  "/:userId/friend-request",
+  authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
+  validation(sendFriendRequsetSchema),
+  userService.sendFriendRequest,
+);
+
+router.patch(
+  "/:requestId/accept",
+  authentication(TokenTypeEnum.ACCESS, [RoleEnum.USER]),
+  validation(acceptFriendRequsetSchema),
+  userService.acceptFriendRequset,
 );
 
 export default router;

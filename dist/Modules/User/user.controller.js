@@ -32,4 +32,6 @@ router.patch("/cover-image", (0, authentaication_middleware_1.authentication)(to
 }), user_service_1.default.coverImages);
 router.delete("/delete-file", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), user_service_1.default.deleteFile);
 router.delete("/delete-files", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), user_service_1.default.deleteMultipleFiles);
+router.post("/:userId/friend-request", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, validations_middleware_1.validation)(user_validation_1.sendFriendRequsetSchema), user_service_1.default.sendFriendRequest);
+router.patch("/:requestId/accept", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, validations_middleware_1.validation)(user_validation_1.acceptFriendRequsetSchema), user_service_1.default.acceptFriendRequset);
 exports.default = router;

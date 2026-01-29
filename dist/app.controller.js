@@ -19,6 +19,7 @@ const s3_config_1 = require("./Utils/multer/s3.config");
 const util_1 = require("util");
 const stream_1 = require("stream");
 const socket_io_1 = require("socket.io");
+const token_1 = require("./Utils/security/token");
 (0, dotenv_1.config)({ path: path_1.default.resolve("./config/.env.dev") });
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
@@ -94,21 +95,25 @@ const bootstrap = async () => {
             origin: "*",
         },
     });
-    let connectedSockets = [];
-    io.on("connection", (socket) => {
-        console.log(socket.id, "Classic Connection");
-        connectedSockets.push(socket.id);
-        io.except(connectedSockets[connectedSockets.length - 3]).emit("product", { id: 1, this: "product1", price: 14451 }, (res) => {
-            console.log(res);
-        });
-        socket.on("disconnect", () => {
-            console.log("Client disconnected : ", socket.id);
-        });
+    const connectedSockets = new Map();
+    io.use(async (socket, next) => {
+        try {
+            const { user, decoded } = await (0, token_1.decodedToken)({
+                tokenType: token_1.TokenTypeEnum.ACCESS,
+                authoriztion: socket.handshake.auth.authorization,
+            });
+            connectedSockets.set(user._id.toString(), socket.id);
+            next();
+        }
+        catch (error) {
+            next(error);
+        }
     });
-    io.of("/admin").on("connection", (socket) => {
-        console.log(socket.id, "Admin Connection");
+    io.on("connection", (socket) => {
+        console.log(socket.id);
         socket.on("disconnect", () => {
             console.log("Client disconnected : ", socket.id);
+            connectedSockets.delete(socket.id);
         });
     });
 };

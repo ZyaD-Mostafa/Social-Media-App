@@ -6,16 +6,22 @@ import { UserModel } from "../../DB/models/user.model";
 import { UserRepository } from "../../DB/repository/user.repository";
 import {
   createPresignedURL,
+  deleteFiles,
   delteFile,
-  delteFiles,
   uploadFile,
   uploadFiles,
-  uploadLargeFile,
 } from "../../Utils/multer/s3.config";
-import { BadRequestException } from "../../Utils/response/error.response";
+import {
+  BadRequestException,
+  ConflictRequestException,
+} from "../../Utils/response/error.response";
+import { FriendRepository } from "../../DB/repository/friend.repository";
+import { FriendModel } from "../../DB/models/friendsRequest.model";
+import { Types } from "mongoose";
 
 class UserService {
   private _userModel = new UserRepository(UserModel);
+  private _friendModel = new FriendRepository(FriendModel);
 
   constructor() {}
 
@@ -25,6 +31,7 @@ class UserService {
       data: { user: req.user, decoded: req.decoded },
     });
   };
+
   logout = async (req: Request, res: Response): Promise<Response> => {
     const { flag }: LogoutDto = req.body;
     let statusCode: number = 200;
@@ -145,10 +152,102 @@ class UserService {
     if (!urls || !Array.isArray(urls) || urls.length === 0) {
       throw new BadRequestException("urls must be a non-empty array");
     }
-    const result = await delteFiles({ urls });
+    const result = await deleteFiles({ urls });
     return res.status(200).json({
       message: "Done",
       result,
+    });
+  };
+
+  sendFriendRequest = async (
+    req: Request,
+    res: Response,
+  ): Promise<Response> => {
+    const { userId } = req.params as unknown as { userId: Types.ObjectId };
+
+    if (!userId) throw new BadRequestException("User Id is required");
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException("Invalid user id");
+    }
+    const currentUserId = req.user!._id;
+
+    const checkFriendRequestExists = await this._friendModel.findOne({
+      filter: {
+        $or: [
+          { createdBy: currentUserId, sendTo: new Types.ObjectId(userId) },
+          { createdBy: new Types.ObjectId(userId), sendTo: currentUserId },
+        ],
+      },
+    });
+
+    if (checkFriendRequestExists)
+      throw new ConflictRequestException("Friend Request Already Exists");
+
+    [
+      await this._friendModel.create({
+        data: [
+          {
+            createdBy: currentUserId,
+            sendTo: userId,
+          },
+        ],
+      }),
+    ];
+    return res.status(200).json({
+      message: "friend request sent successfully",
+      data: { user: req.user?.username, sendTo: userId },
+    });
+  };
+
+  acceptFriendRequset = async (
+    req: Request,
+    res: Response,
+  ): Promise<Response> => {
+    const { requestId } = req.params as unknown as {
+      requestId: Types.ObjectId;
+    };
+
+    const checkFriendRequestExists = await this._friendModel.findOneAndUpdate({
+      filter: {
+        _id: requestId,
+        sendTo: req.user!._id,
+        acceptedAt: { $exists: false },
+      },
+      update: {
+        acceptedAt: new Date(),
+        $inc: { __v: 1 },
+      },
+    });
+
+    if (!checkFriendRequestExists)
+      throw new BadRequestException("Fail to accept friend request");
+
+    await Promise.all([
+      await this._userModel.updateOne({
+        filter: {
+          _id: checkFriendRequestExists.createdBy,
+        },
+        update: {
+          $addToSet: {
+            friends: checkFriendRequestExists.sendTo,
+          },
+        },
+      }),
+
+      await this._userModel.updateOne({
+        filter: {
+          _id: checkFriendRequestExists.sendTo,
+        },
+        update: {
+          $addToSet: {
+            friends: checkFriendRequestExists.createdBy,
+          },
+        },
+      }),
+    ]);
+
+    return res.status(201).json({
+      message: "Done",
     });
   };
 }

@@ -1,11 +1,4 @@
-import {
-  HydratedDocument,
-  model,
-  models,
-  Schema,
-  Types,
-  UpdateQuery,
-} from "mongoose";
+import { HydratedDocument, model, models, Schema, Types } from "mongoose";
 import { BadRequestException } from "../../Utils/response/error.response";
 import { generateHash } from "../../Utils/security/hash";
 import { TokenModel } from "./token.model";
@@ -41,6 +34,7 @@ export interface IUser {
   slug: String;
   changeCredintaialstime?: Date;
   freezedAt?: Date;
+  friends?: Types.ObjectId[];
 }
 const userSchema = new Schema<IUser>(
   {
@@ -83,6 +77,12 @@ const userSchema = new Schema<IUser>(
       minLength: 3,
       maxLength: 61,
     },
+    friends: [
+      {
+        type: Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,
