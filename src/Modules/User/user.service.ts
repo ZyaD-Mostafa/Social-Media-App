@@ -26,6 +26,7 @@ class UserService {
   constructor() {}
 
   getProfile = async (req: Request, res: Response): Promise<Response> => {
+    await req.user?.populate("friends")
     return res.status(200).json({
       message: "Done",
       data: { user: req.user, decoded: req.decoded },

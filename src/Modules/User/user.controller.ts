@@ -15,8 +15,11 @@ import {
   StorageEnum,
 } from "../../Utils/multer/cloud.multer";
 import { verifyMagicFileUpload } from "../../Middlewares/verfiyFileUpload.middleware";
+import ChatRouter from "../Chat/chat.controller";
 
 const router: Router = Router();
+// localhosy:300/api/v1/user/userID/chat
+router.use("/:userId/chat", ChatRouter);
 
 router.get(
   "/profile",

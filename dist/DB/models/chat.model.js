@@ -19,7 +19,7 @@ const messageSchema = new mongoose_2.Schema({
     timestamps: true,
 });
 const chatSchema = new mongoose_2.Schema({
-    particiants: { types: mongoose_2.Types.ObjectId, required: true, ref: "User" },
+    particiants: [{ type: mongoose_2.Types.ObjectId, required: true, ref: "User" }],
     createdBy: {
         type: mongoose_2.Types.ObjectId,
         required: true,
@@ -31,7 +31,7 @@ const chatSchema = new mongoose_2.Schema({
         type: String,
         required: function () {
             return this.roomId;
-        }
+        },
     },
     messages: [messageSchema],
 }, {

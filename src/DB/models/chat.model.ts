@@ -48,22 +48,22 @@ const messageSchema = new Schema<IMessage>(
 );
 const chatSchema = new Schema<IChat>(
   {
-    particiants: { types: Types.ObjectId, required: true, ref: "User" },
-     createdBy: {
+    particiants: [{ type: Types.ObjectId, required: true, ref: "User" }],
+    createdBy: {
       type: Types.ObjectId,
       required: true,
       ref: "User",
     },
 
-    group :String , 
-    group_image : String , 
-    roomId :{
-        type: String,
-        required :function(){
-            return this.roomId;
-        }
+    group: String,
+    group_image: String,
+    roomId: {
+      type: String,
+      required: function () {
+        return this.roomId;
+      },
     },
-    messages:[messageSchema],
+    messages: [messageSchema],
   },
   {
     timestamps: true,

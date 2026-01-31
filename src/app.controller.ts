@@ -16,12 +16,11 @@ import connDB from "./DB/connections";
 import { createGetPresignedURL, getFile } from "./Utils/multer/s3.config";
 import { promisify } from "util";
 import { pipeline } from "stream";
-import { Server, Socket } from "socket.io";
-import { decodedToken, TokenTypeEnum } from "./Utils/security/token";
+import { initalize } from "./Modules/gateway/gateway";
 config({ path: path.resolve("./config/.env.dev") });
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, //15M
-  limit: 100,
+  limit: 200,
   message: {
     status: 429,
     message:
@@ -118,39 +117,5 @@ export const bootstrap = async () => {
   });
 
   // socket io server creation and listen to httpServer
-  const io = new Server(httpServer, {
-    cors: {
-      origin: "*",
-    },
-  });
-
-  const connectedSockets = new Map<string, string>(); // key---->value
-
-  io.use(async (socket: Socket, next) => {
-    try {
-      const { user, decoded } = await decodedToken({
-        tokenType: TokenTypeEnum.ACCESS,
-        authoriztion: socket.handshake.auth.authorization,
-      });
-      connectedSockets.set(user._id.toString(), socket.id);
-
-      next();
-    } catch (error: any) {
-      next(error);
-    }
-  });
-
-  // http://localhost:3000/
-  io.on("connection", (socket) => {
-    console.log(socket.id);
-    socket.on("disconnect", () => {
-      console.log("Client disconnected : ", socket.id);
-      connectedSockets.delete(socket.id);
-    });
-  })
-
-  
-
-
-  
+  initalize(httpServer);
 };

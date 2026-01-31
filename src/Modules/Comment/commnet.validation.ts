@@ -4,7 +4,7 @@ import { fileValidtion } from "../../Utils/multer/cloud.multer";
 
 
 
-export const createCommentSchema ={
+export const createCommentSchema = {
   body:z.strictObject({
     content:z.string().min(2).max(50000).optional(),
     attachments:z.array(generalFields.file(fileValidtion.images)).max(3).optional(),

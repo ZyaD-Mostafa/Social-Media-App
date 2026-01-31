@@ -18,12 +18,11 @@ const connections_1 = __importDefault(require("./DB/connections"));
 const s3_config_1 = require("./Utils/multer/s3.config");
 const util_1 = require("util");
 const stream_1 = require("stream");
-const socket_io_1 = require("socket.io");
-const token_1 = require("./Utils/security/token");
+const gateway_1 = require("./Modules/gateway/gateway");
 (0, dotenv_1.config)({ path: path_1.default.resolve("./config/.env.dev") });
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000,
-    limit: 100,
+    limit: 200,
     message: {
         status: 429,
         message: "Too many requests from this IP, please try again after 15 minutes",
@@ -90,31 +89,6 @@ const bootstrap = async () => {
     const httpServer = app.listen(port, () => {
         console.log(`Server is Running on port`, port);
     });
-    const io = new socket_io_1.Server(httpServer, {
-        cors: {
-            origin: "*",
-        },
-    });
-    const connectedSockets = new Map();
-    io.use(async (socket, next) => {
-        try {
-            const { user, decoded } = await (0, token_1.decodedToken)({
-                tokenType: token_1.TokenTypeEnum.ACCESS,
-                authoriztion: socket.handshake.auth.authorization,
-            });
-            connectedSockets.set(user._id.toString(), socket.id);
-            next();
-        }
-        catch (error) {
-            next(error);
-        }
-    });
-    io.on("connection", (socket) => {
-        console.log(socket.id);
-        socket.on("disconnect", () => {
-            console.log("Client disconnected : ", socket.id);
-            connectedSockets.delete(socket.id);
-        });
-    });
+    (0, gateway_1.initalize)(httpServer);
 };
 exports.bootstrap = bootstrap;
