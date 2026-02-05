@@ -8,15 +8,26 @@ const error_response_1 = require("../../Utils/response/error.response");
 const friend_repository_1 = require("../../DB/repository/friend.repository");
 const friendsRequest_model_1 = require("../../DB/models/friendsRequest.model");
 const mongoose_1 = require("mongoose");
+const chat_model_1 = require("../../DB/models/chat.model");
+const chat_repository_1 = require("../../DB/repository/chat.repository");
 class UserService {
     _userModel = new user_repository_1.UserRepository(user_model_1.UserModel);
     _friendModel = new friend_repository_1.FriendRepository(friendsRequest_model_1.FriendModel);
+    _chatModel = new chat_repository_1.ChatRepository(chat_model_1.ChatModel);
     constructor() { }
     getProfile = async (req, res) => {
         await req.user?.populate("friends");
+        const groups = await this._chatModel.find({
+            filter: {
+                particiants: { $in: [req.user?._id] },
+                group: { $exists: true },
+            },
+        });
+        if (!groups)
+            throw new error_response_1.NotFoundRequestException("user not in a groups ");
         return res.status(200).json({
             message: "Done",
-            data: { user: req.user, decoded: req.decoded },
+            data: { user: req.user, decoded: req.decoded, groups },
         });
     };
     logout = async (req, res) => {

@@ -13,6 +13,7 @@ const path_1 = __importDefault(require("path"));
 const auth_controller_1 = __importDefault(require("./Modules/Auth/auth.controller"));
 const user_controller_1 = __importDefault(require("./Modules/User/user.controller"));
 const post_controller_1 = __importDefault(require("./Modules/Post/post.controller"));
+const chat_controller_1 = __importDefault(require("./Modules/Chat/chat.controller"));
 const error_response_1 = require("./Utils/response/error.response");
 const connections_1 = __importDefault(require("./DB/connections"));
 const s3_config_1 = require("./Utils/multer/s3.config");
@@ -80,6 +81,7 @@ const bootstrap = async () => {
     app.use("/api/v1/auth", auth_controller_1.default);
     app.use("/api/v1/user", user_controller_1.default);
     app.use("/api/v1/post", post_controller_1.default);
+    app.use("/api/v1/chat", chat_controller_1.default);
     app.use("{/*dummy}", (req, res) => {
         res.status(404).json({
             message: "Not Found Handller",

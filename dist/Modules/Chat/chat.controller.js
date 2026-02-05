@@ -12,4 +12,6 @@ const chat_validation_1 = require("./chat.validation");
 const chat_service_1 = __importDefault(require("./chat.service"));
 const router = (0, express_1.Router)({ mergeParams: true });
 router.get("/", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, validations_middleware_1.validation)(chat_validation_1.getChatSchema), chat_service_1.default.getChat);
+router.post("/group", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, validations_middleware_1.validation)(chat_validation_1.createChatGroupSchema), chat_service_1.default.createGroupChat);
+router.get("/getChat/:groupid", (0, authentaication_middleware_1.authentication)(token_1.TokenTypeEnum.ACCESS, [user_model_1.RoleEnum.USER]), (0, validations_middleware_1.validation)(chat_validation_1.getGroupChatSchema), chat_service_1.default.getGroupChat);
 exports.default = router;

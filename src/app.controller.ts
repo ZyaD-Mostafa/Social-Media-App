@@ -8,6 +8,7 @@ import path from "path";
 import authRouter from "./Modules/Auth/auth.controller";
 import UserRouter from "./Modules/User/user.controller";
 import postRouter from "./Modules/Post/post.controller";
+import chatRouter from "./Modules/Chat/chat.controller";
 import {
   BadRequestException,
   globalErrorHandler,
@@ -103,6 +104,7 @@ export const bootstrap = async () => {
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/user", UserRouter);
   app.use("/api/v1/post", postRouter);
+  app.use("/api/v1/chat", chatRouter);
 
   app.use("{/*dummy}", (req: Request, res: Response) => {
     res.status(404).json({

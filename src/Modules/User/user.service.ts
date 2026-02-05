@@ -14,22 +14,35 @@ import {
 import {
   BadRequestException,
   ConflictRequestException,
+  NotFoundRequestException,
 } from "../../Utils/response/error.response";
 import { FriendRepository } from "../../DB/repository/friend.repository";
 import { FriendModel } from "../../DB/models/friendsRequest.model";
 import { Types } from "mongoose";
+import { ChatModel } from "../../DB/models/chat.model";
+import { ChatRepository } from "../../DB/repository/chat.repository";
 
 class UserService {
   private _userModel = new UserRepository(UserModel);
   private _friendModel = new FriendRepository(FriendModel);
+  private _chatModel = new ChatRepository(ChatModel);
 
   constructor() {}
 
   getProfile = async (req: Request, res: Response): Promise<Response> => {
-    await req.user?.populate("friends")
+    await req.user?.populate("friends");
+
+    const groups = await this._chatModel.find({
+      filter: {
+        particiants: { $in: [req.user?._id as Types.ObjectId] },
+        group: { $exists: true },
+      },
+    });
+
+    if (!groups) throw new NotFoundRequestException("user not in a groups ");
     return res.status(200).json({
       message: "Done",
-      data: { user: req.user, decoded: req.decoded },
+      data: { user: req.user, decoded: req.decoded, groups },
     });
   };
 

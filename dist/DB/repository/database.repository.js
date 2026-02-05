@@ -49,7 +49,7 @@ class DatabaseRepository {
             results,
         };
     }
-    async findOneAndUpdate({ filter, update, options, }) {
+    async findOneAndUpdate({ filter, update, options = { new: true }, }) {
         const doc = this.model.findOneAndUpdate(filter, update);
         if (options?.populate) {
             doc.populate(options.populate);

@@ -62,11 +62,11 @@ export abstract class DatabaseRepository<TDocument> {
     if (options?.populate) {
       doc.populate(options.populate as PopulateOptions[]);
     }
-    if(options?.limit){
-      doc.limit(options.limit)
+    if (options?.limit) {
+      doc.limit(options.limit);
     }
-    if(options?.skip){
-      doc.skip(options.skip)
+    if (options?.skip) {
+      doc.skip(options.skip);
     }
     return await doc.exec();
   }
@@ -105,7 +105,7 @@ export abstract class DatabaseRepository<TDocument> {
   async findOneAndUpdate({
     filter,
     update,
-    options,
+    options = { new: true },
   }: {
     filter: QueryFilter<TDocument>;
     update: UpdateQuery<TDocument>;

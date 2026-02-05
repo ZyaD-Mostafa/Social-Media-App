@@ -1,6 +1,6 @@
 import z from "zod";
 import { IAuthSocket } from "../gateway/gateway.dto";
-import { getChatSchema } from "./chat.validation";
+import { createChatGroupSchema, getChatSchema, getGroupChatSchema } from "./chat.validation";
 import { Server } from "socket.io";
 
 export interface ISayHiDto {
@@ -16,5 +16,18 @@ export interface ISendMessageDto {
   sendTo: string;
   io :Server
 }
+export interface IJoinRoomDto {
+  roomId: string;
+  socket: IAuthSocket;
+  io :Server
+}
+export interface ISendGroupMessageDTO {
+  content: string;
+  groupId: string;
+  socket: IAuthSocket;
+  io :Server
+}
 
 export type getChatSDto = z.infer<typeof getChatSchema.params>
+export type ICreateChatGroupSDto = z.infer<typeof createChatGroupSchema.body>
+export type IGetChatGroupDto = z.infer<typeof getGroupChatSchema.params>
